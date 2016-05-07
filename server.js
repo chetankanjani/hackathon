@@ -9,21 +9,18 @@ var path=require('path');
 
 var app = express();
 
+var http = require('http');
+var server = http.createServer(app);
+
 
 app.use(bodyparser.urlencoded({extended:true}));
 app.use(bodyparser.json());
 app.use(morgan('dev'));
 
-
-
-//app.use(express.static(__dirname + '/public'));
-//app.use(express.static(__dirname + '/public/html'));
+app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/public/app'));
 app.use(express.static(__dirname + '/'));
-
-
-
-
-
+app.use(express.static(__dirname + '/node_modules'));
 
 
 
@@ -38,12 +35,14 @@ mongoose.connect(config.database,function(err){
 
 
 app.get('/',function(req,res){
-    //res.sendFile(__dirname +'/public/index.html' );
-    res.json({message:"hello"});
+    res.sendFile(__dirname +'/public/index.html');
 });
 
 
-app.listen(config.port,function(err){
+
+
+
+server.listen(config.port,function(err){
     if(err)
         console.log(err);
     else
@@ -53,9 +52,11 @@ app.listen(config.port,function(err){
 
 
 var api = require('./routes/api')(app, express);
+var tracking=require('./tracking')(server,http);
 
 
 app.use('/api',api);
+
 
 
 

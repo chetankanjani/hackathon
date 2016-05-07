@@ -4,11 +4,13 @@ var bcrypt=require('bcrypt-nodejs');
 
 
 var UserSchema = mongoose.Schema({
-    name: String,
-    username: {type: String },
-    pickUpAddress:{street:String,area:String,city:String,pincode:String,state:String},
-    phoneNumber:{type:String,unique:true},
-    status:{type:String,default:'Active'}
+    phoneNumber:{type:String},
+    id:String,
+    facebook:{id:String,token:String,name:String,email:String,pictureUrl:String},
+    friends:[{id:String,pictureUrl:String,name:String}],
+    mode:{type:String,default:true},
+    lat:String,
+    long:String
 
 });
 

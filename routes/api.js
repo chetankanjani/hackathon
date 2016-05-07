@@ -13,12 +13,11 @@ function createToken(user) {                                                    
 
     var token = jsonwebtoken.sign({
 
-        _id: user._id,
-        phoneNumber: user.phoneNumber,
+        id: user.id
 
 
-    }, config.superSecretCustomer, {
-        expiresInMinutes: 1440
+    }, config.superSecret, {
+        expiresIn: 1440
 
     });
 
@@ -71,66 +70,154 @@ module.exports = function (app, express) {
     //});
     //
 
+
+    api.post('/login',function(req,res){
+
+        var id=req.body.id;
+
+        User.findOne({'facebook.id':id},function(err,user){
+
+
+            if(err)
+                res.json(err);
+
+            else if(user){
+
+
+
+                var token = createToken(user);
+
+
+                res.json({"success": true, "token": token});
+
+            }
+            else {
+
+                var user = new User();
+                console.log(req.body.id);
+                user.id=req.body.id;
+                //console.log(request.)
+
+                user.facebook.id = req.body.id;
+                user.facebook.name = req.body.name;
+                user.facebook.email = req.body.email;
+                user.facebook.token = req.body.token;
+                user.facebook.pictureUrl=req.body.pictureUrl;
+                console.log(user);
+
+                user.save(function (err) {
+                    if (err) {
+                        if (err.code == 11000)
+                            return res.json({message: "User with this phone number already exist ", success: false});
+                        else {
+                            console.log(err);
+                            return res.json({message: "User not created", success: false});
+
+                        }
+                    }
+                    else {
+
+                        var token=createToken(user);
+                        return res.json({message: "User created Successfully!", success: true,token:token});
+                    }
+
+
+                });
+
+            }
+
+
+        });
+    });
+
+
+    ////// Middleware
+    //api.use(function (req,res,next) {
+    //    var token = req.body.token || req.param('token') || req.headers['x-access-token'];
     //
-    //api.post('/login',function(req,res){
-    //
-    //    var phoneNumber=req.body.phoneNumber;
-    //
-    //    User.findOne({'phoneNumber':phoneNumber},function(err,user){
-    //
-    //
-    //        if(err)
-    //            res.json(err);
-    //        else if(!user){
-    //
-    //            res.json({"success":false,"message":"user does not exist"});
-    //
-    //        }
-    //        else if(user){
-    //
-    //
-    //            if(user.status=='Active') {
-    //
-    //
-    //                var token = createToken(user);
-    //
-    //                res.json({"success": true, "token": token});
+    //    if(token){
+    //        jsonwebtoken.verify(token, secretKey, function(err, decoded){
+    //            if(err){
+    //                res.status(403).send({success: false, message: "Failed to connect"});
+    //            }else {
+    //                req.decoded= decoded;
+    //                next();
     //            }
-    //            else
-    //                res.json({"success":true,"message":"User blocked"});
-    //        }
-    //    });
-    //});
-
-
-
-    //////authentication
-    //api.use(function(req, res, next) {
+    //        });
+    //    }else {
     //
-    //
-    ////console.log("Somebody just came to our app!");
-    //
-    //var token = req.body.token || req.param('token') || req.headers['x-access-token'];
-    //
-    //// check if token exist
-    //if(token) {
-    //
-    //jsonwebtoken.verify(token, config.superSecretCustomer, function(err, decoded) {
-    //
-    //if(err) {
-    //res.status(403).send({ success: false, message: "Failed to authenticate user"});
+    //        res.status(403).send({success: false, message: "false token"});
     //    }
     //
     //});
-    //} else {
-    //    res.status(403).send({ success: false, message: "No Token Provided"});
-    //}
-    //
-    //});
+    api.get('/getAllUsers',function(req,res){
 
 
+        //var id=req.param.user_id;
+
+        User.find({}, function (err, users) {
+            if (err) {
+                res.send(err);
+                return;
+            }
+            else if(users) {
+
+                res.json(users);
+            }
+            else
+                res.json(null);
+        });
+
+    });
+
+    api.get('/getAllFriends',function(req,res){
 
 
+        //var id=req.param.user_id;
+
+        User.findOne({'facebook.id': req.param.id}, function (err, users) {
+            if (err) {
+                res.send(err);
+                return;
+            }
+            else if(users) {
+
+                res.json(users.friends);
+            }
+            else
+                res.json(null);
+        });
+
+    });
+    api.post('/addFriend', function(req, res) {
+            id=req.body.id;
+            friendid=req.body.id;
+        User.findOneAndUpdate({ 'facebook.id': id },
+            { $push: { friends:{ id:friendid}}},
+            { upsert: true },
+            function(fav) { res.json({success:true}); });
+    });
+
+    api.post('/removeFriend', function (req, res) {
+        // _id: req.body.id;
+        User.findOneAndUpdate({'facebook.id': req.param.id},
+            {$pull: {friends: {name: req.body.name}}},
+            function (err) {
+                if (err)
+                    return err;
+                else
+                    res.json({success: true});
+            });
+    });
+    api.post('/updatephoneNumber',function(req,res){
+        User.update({"facebook.id": req.param.id},{$set:{'phoneNumber': req.body.phoneNumber}}, function (err, name) {
+            if(err){
+                res.send(err);
+                return;
+            }
+            res.json({success:true});
+        })
+    })
 
 
     return api;
