@@ -32,6 +32,7 @@ var User=require('./model/user');
             lat=data.lat;
             long=data.long;
 
+
             User.findOne({'facebook.id':socket.userid},function(err,user){
 
                 if(err)
@@ -44,7 +45,7 @@ var User=require('./model/user');
                         for (var i = 0; i < user.friends.length; i++) {
 
                             if(room[user.friends[i].id]!=null) {
-                                io.sockets.connected[room[user.friends[i].id]].emit('update marker', lat, long);
+                                io.sockets.connected[room[user.friends[i].id]].emit('update marker', lat, long,socket.userid);
                             }
                         }
                     }

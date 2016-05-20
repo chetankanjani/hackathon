@@ -67,7 +67,6 @@ module.exports = function (app, express) {
         });
     });
 
-
     ////// Middleware
     api.use(function (req,res,next) {
         var token = req.body.token || req.param('token') || req.headers['x-access-token'];
@@ -112,7 +111,6 @@ module.exports = function (app, express) {
                 return;
             }
             else if(users) {
-
                 res.json(users.friends);
             }
             else

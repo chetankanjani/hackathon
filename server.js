@@ -23,9 +23,7 @@ mongoose.connect(config.database,function(err){
     else {
         console.log('database connected');
     }
-
 });
-
 app.get('/',function(req,res){
     res.json({"message":"Hello World!"});
 });
@@ -40,7 +38,6 @@ server.listen(config.port,function(err){
 
 var api = require('./routes/api')(app, express);
 var tracking=require('./tracking')(server,http);
-
 app.use('/api',api);
 
 
