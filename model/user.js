@@ -2,7 +2,6 @@ var mongoose=require('mongoose');
 var Schema=mongoose.Schema;
 var bcrypt=require('bcrypt-nodejs');
 
-
 var UserSchema = mongoose.Schema({
     phoneNumber:{type:String},
     id:String,
@@ -13,7 +12,6 @@ var UserSchema = mongoose.Schema({
     long:String
 
 });
-
 
 UserSchema.pre('save', function(next) {
 
@@ -45,6 +43,5 @@ UserSchema.methods.comparePassword = function(password) {
     }
 
 }
-
 
 module.exports=mongoose.model('User',UserSchema);
