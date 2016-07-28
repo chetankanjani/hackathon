@@ -1,6 +1,6 @@
 
 var config = {
-    'port': process.env.port || 80,
+    'port': process.env.port || 3003,
     'database':'mongodb://127.0.0.1:27017/hackathon',                                                  // database connection link
     'superSecret':'itsasecret'                                               // key for generating for customer api token
 
